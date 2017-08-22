@@ -21,15 +21,18 @@ public class MainProgram {
 	
 	private static String CONFIG_FILE_PATH = "matriz.txt"; 
 	private static String START_POINT = "A", END_POINT = "D"; 
+	private static int POS_START_POINT = -1, POS_END_POINT = -1;
 	
 	public static void main(String[] args) {
 		//
 		//Exibir o que veio por parâmetro.
+		/*
 		int i = 0;
 		for (String s : args) {
 			System.out.println("args[" + i + "] = " + s);
 			i++;
 		}
+		*/
 		//
 		//
 		
@@ -58,8 +61,10 @@ public class MainProgram {
 			//Primeira linha contém os cabeçalhos, assim como cada linha na mesma posição
 			char [] cabecalhos = txtVetor[0].trim().toCharArray();
 			
+			int cabecalhosLen = cabecalhos.length;
+			
 			//Inicializa a Matriz
-			String [][] txtMatriz = new String[cabecalhos.length][cabecalhos.length];
+			String [][] txtMatriz = new String[cabecalhosLen][cabecalhosLen];
 			int linha = 0, coluna = 0;
 			
 			//Começar contagem em 1, pois 0 são os cabeçalhos
@@ -74,17 +79,42 @@ public class MainProgram {
 					txtMatriz[linha][coluna] = String.valueOf(c.charAt(j));
 					coluna++;
 				}
-				linha++;
 				
+				if (cabecalhos[linha] == START_POINT.charAt(0)) {
+					POS_START_POINT = linha;
+				}
+				if (cabecalhos[linha] == END_POINT.charAt(0)) {
+					POS_END_POINT = linha;
+				}
+				
+				linha++;
 			}
 			
 			
+			System.out.println("POS_START: " + POS_START_POINT + ", POS_END: " + POS_END_POINT);
+			///*
+			System.out.println("Matriz:");
 			for (String[] ss : txtMatriz) {
 				for (String string : ss) {
 					System.out.print(string);
 				}
 				System.out.println();
 			}
+			//*/
+			
+			
+			int [] caminhosPercorridos = new int[cabecalhosLen];
+			//Marcar o nó inicial 
+			caminhosPercorridos[POS_START_POINT] = 1;
+			
+			/* 
+				flag
+				while flag=true
+					flag=false
+						for 1 (matriz) - k
+							for 2 (linha) - j
+								if n[k] = 1 && m[k][j]=1 and not n[j]
+			 */
 			
 		} catch (FileNotFoundException fe) {
 			fe.printStackTrace();

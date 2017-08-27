@@ -1,10 +1,10 @@
 package mainProgram;
 
 import java.io.FileNotFoundException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
-import utilitarios.TextReader;
+import utilitarios.*;
 
 /**
  * 
@@ -19,22 +19,24 @@ import utilitarios.TextReader;
  */
 public class MainProgram {
 	
-	private static String CONFIG_FILE_PATH = "matriz.txt"; 
-	private static String START_POINT = "A", END_POINT = "D"; 
+	private static String CONFIG_FILE_PATH = "matriz.txt";
+	private static String OUTPUT_FILE_PATH = "matriz_resultado.txt";
+	private static String START_POINT = "A", END_POINT = "A"; 
 	private static int POS_START_POINT = -1, POS_END_POINT = -1;
 	
+	private static boolean START_ELEMENT_ENCONTRADO = false;
+	private static boolean END_ELEMENT_ENCONTRADO = false;
+	
+	//private static List<Elemento> ELEMENTOS = new ArrayList<>();
+	
 	public static void main(String[] args) {
-		//
+		List<Elemento> ELEMENTOS = new ArrayList<>();
+		
 		//Exibir o que veio por parâmetro.
-		/*
-		int i = 0;
-		for (String s : args) {
-			System.out.println("args[" + i + "] = " + s);
-			i++;
+		System.out.println("Parâmetros recebidos: ");
+		for (int i = 0; i < args.length; i++) {
+			System.out.println("args[" + i + "] = " + args[i]);
 		}
-		*/
-		//
-		//
 		
 		if (args.length > 0) {
 			//Parâmetro da Matriz de Adjacência
@@ -60,6 +62,11 @@ public class MainProgram {
 			
 			//Primeira linha contém os cabeçalhos, assim como cada linha na mesma posição
 			char [] cabecalhos = txtVetor[0].trim().toCharArray();
+			
+			//Criar todos os "cabeçalhos"
+			for (int i = 0; i < cabecalhos.length; i++) {
+				ELEMENTOS.add(i, new Elemento(cabecalhos[i]));
+			}
 			
 			int cabecalhosLen = cabecalhos.length;
 			
@@ -90,9 +97,8 @@ public class MainProgram {
 				linha++;
 			}
 			
+			//System.out.println("POS_START: " + POS_START_POINT + ", POS_END: " + POS_END_POINT);
 			
-			System.out.println("POS_START: " + POS_START_POINT + ", POS_END: " + POS_END_POINT);
-			///*
 			System.out.println("Matriz:");
 			for (String[] ss : txtMatriz) {
 				for (String string : ss) {
@@ -100,26 +106,73 @@ public class MainProgram {
 				}
 				System.out.println();
 			}
-			//*/
+
+			//Inicializar uma lista com o mapeamento dos caminhos.
+			for (int i = 0; i < txtMatriz.length; i++) {
+				for (int j = 0; j < txtMatriz[i].length; j++) {
+					if (txtMatriz[i][j].equals("1")) {
+						Elemento eOrigem = ELEMENTOS.get(i);
+						Elemento eDestino = ELEMENTOS.get(j);
+						eOrigem.addChild(eDestino);
+					}
+				}
+			}
 			
+			//Começar a rotina no elemento inicial
+			Elemento base = ELEMENTOS.get(POS_START_POINT);
+			buscarCaminho(base);
 			
-			int [] caminhosPercorridos = new int[cabecalhosLen];
-			//Marcar o nó inicial 
-			caminhosPercorridos[POS_START_POINT] = 1;
+			//Exibir o resultado
+			String resultado = START_ELEMENT_ENCONTRADO && END_ELEMENT_ENCONTRADO ? "Caminho ENCONTRADO. :)":"Caminho NÃO encontrado. :(";
+			System.out.println(resultado);
 			
-			/* 
-				flag
-				while flag=true
-					flag=false
-						for 1 (matriz) - k
-							for 2 (linha) - j
-								if n[k] = 1 && m[k][j]=1 and not n[j]
-			 */
-			
+			//Gravar o resultado em um arquivo.
+			System.out.println("Gravando o resultado para o arquivo: " + "\"" + OUTPUT_FILE_PATH + "\"");
+			TextWriter.writeTextToFile(OUTPUT_FILE_PATH, resultado);
 		} catch (FileNotFoundException fe) {
 			fe.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void buscarCaminho(Elemento base){
+		//Verificar o incial e o final apenas uma vez, pois se encontrar o ponto inicial
+		//então o ponto final deverá ser encontrado no elementos filhos.
+		if (base.getName().equals(START_POINT)){
+			START_ELEMENT_ENCONTRADO = true;
+		} else if (base.getName().equals(END_POINT)) {
+			END_ELEMENT_ENCONTRADO = true;
+		}
+		
+		//Se encontrar caminho, parar.
+		if (START_ELEMENT_ENCONTRADO && END_ELEMENT_ENCONTRADO) return;
+		
+		//Navegar nos elementos filhos
+		for (Elemento e : base.getChildren()) {
+			//Verificar se este elemento filho ainda não foi visitado.
+			if (!e.isVisitado()) {
+				//Verificar se o elemento é o ponto inicial ou final.
+				if (!START_ELEMENT_ENCONTRADO && e.getName().equals(START_POINT)) {
+					START_ELEMENT_ENCONTRADO = true;
+				} else if (e.getName().equals(END_POINT)) {
+					END_ELEMENT_ENCONTRADO = true;
+				}
+				
+				//Marcar elemento como visitado, para evitar loops inifitos.
+				e.setVisitado();
+				
+				//Se encontrar caminho, parar.
+				if (START_ELEMENT_ENCONTRADO && END_ELEMENT_ENCONTRADO) break;
+				
+				//Se o elemento for diferente do elemento filho, então continuar a busca...
+				if (e.getName() != base.getName()) {
+					buscarCaminho(e);
+				}
+			}
+		}
+		
+		//Se encontrar os pontos inicial e final, retornar para parar.
+		if (START_ELEMENT_ENCONTRADO && END_ELEMENT_ENCONTRADO) return;
 	}
 }

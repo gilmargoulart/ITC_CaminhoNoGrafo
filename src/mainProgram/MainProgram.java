@@ -43,7 +43,7 @@ public class MainProgram {
 		/*
 		“Sobre a entrada <G,s,t> onde G é um grafo direcionado com nos S e T:
 		1. Ponha uma marca sobre o no S.
-		2. Repita o seguinte até que nenhum né adicional seja marcado:
+		2. Repita o seguinte até que nenhum nó adicional seja marcado:
 		3. Faça uma varredura em todas as arestas de G. Se uma aresta (a,b) for encontrada indo de um nó marcado A para um nó não marcado B, marque o nó B.
 		4. Se T estiver marcado, aceite. Caso contrário, rejeite.”
 		*/
